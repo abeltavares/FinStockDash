@@ -1,4 +1,40 @@
+"""
+This module contains utility functions for the financial analysis application.
+"""
+
+# Import necessary libraries
 import streamlit as st
+
+
+def config_menu_footer(github_user,linkedin_user, author_name):
+    """
+    Hides the Streamlit menu and replaces footer.
+
+    Parameters:
+        github_user (str): The username for the GitHub account.
+        linkedin_user (str): The username for the LinkedIn account.
+        author_name (str): The name of the author.
+    """
+    app_style = f"""
+        <style>
+            #MainMenu {{
+              visibility: hidden;
+            }}
+            footer {{
+                visibility: hidden;
+            }}
+            footer:before {{
+            content:"Produced by {author_name} | GitHub: {github_user} | LinkedIn: {linkedin_user}"; 
+            visibility: visible;
+            display: block;
+            position: relative;
+            text-align: center;
+            }}
+        </style>
+    """
+
+    st.markdown(app_style, unsafe_allow_html=True)
+
 
 def get_delta(df, key):
     """
@@ -29,6 +65,7 @@ def get_delta(df, key):
     # Round to two decimal places and return the result
     return f"{delta:.2f}%"
 
+
 def empty_lines(n):
     """
     Inserts empty lines to separate content.
@@ -38,6 +75,7 @@ def empty_lines(n):
     """
     for _ in range(n):
         st.write("")
+
 
 def generate_card(text):
     """
@@ -52,32 +90,3 @@ def generate_card(text):
             <h3 style='text-align: center'>{text}</h3>
         </div>
          """, unsafe_allow_html=True)
-
-def config_menu_footer(github_user,linkedin_user, author_name):
-    """
-    Hides the Streamlit menu and replaces footer.
-
-    Parameters:
-        github_user (str): The username for the GitHub account.
-        linkedin_user (str): The username for the LinkedIn account.
-        author_name (str): The name of the author.
-    """
-    app_style = """
-        <style>
-            #MainMenu {
-              visibility: hidden;
-            }
-            footer {
-                visibility: hidden;
-            }
-            footer:before {
-            content:f'Produced by {author_name} | GitHub: {github_user} | LinkedIn: {linkedin_user}'; 
-            visibility: visible;
-            display: block;
-            position: relative;
-            text-align: center;
-            }
-        </style>
-    """
-
-    st.markdown(app_style, unsafe_allow_html=True)
