@@ -42,7 +42,7 @@ To run the app locally, follow these steps:
 
 1. Enter a valid stock ticker symbol in the search bar to retrieve financial data for the corresponding company. <br>
 2. Use the various options provided to visualize and analyze financial data. <br>
-3. Click on the "Download Excel" button to download an Excel file with relevant financial information for the selected stock. <br>
+3. Click on the "Download Data" button to download an Excel file with relevant financial information for the selected stock. <br>
 
 ## Contributions
 
