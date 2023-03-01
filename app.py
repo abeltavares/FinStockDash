@@ -424,12 +424,11 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         # Create a download button for the Excel file
         with open(symbol_input + '_financial_data.xlsx', 'rb') as f:
             data = f.read()
-            if st.download_button(
+            st.download_button(
                 label='Download Data',
                 data=data,
                 file_name=symbol_input + '_financial_data.xlsx',
                 mime='application/octet-stream'
-            ):
-                st.success('Download successful!')
+            )
     except Exception as e:
         st.info('Data not available for download')
