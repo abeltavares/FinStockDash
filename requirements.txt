@@ -4,3 +4,4 @@ numpy
 millify
 plotly
 streamlit
+XlsxWriter
