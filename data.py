@@ -2,7 +2,7 @@
 This module provides functions for retrieving financial data from the Financial Modeling Prep and Alpha Vantage API.
 """
 
-
+# Import necessary libraries
 import requests
 import pandas as pd
 import numpy as np
@@ -48,8 +48,6 @@ def get_company_info(symbol: str) -> dict:
             'Currency': data.get('Currency'),
             'Sector': data.get('Sector'),
             'Market Cap':  data.get('MarketCapitalization'),
-            'P/E ratio': data.get('PERatio'),
-            'Dividends (Yield)': data.get('DividendYield'),
             'Profit Margin': data.get('ProfitMargin'),
             'Beta': data.get('Beta'),
             'EPS': data.get('EPS')
@@ -96,6 +94,7 @@ def get_stock_price(symbol: str) -> pd.DataFrame:
         data = response.json()['Monthly Adjusted Time Series']
         df = pd.DataFrame.from_dict(data, orient='index')
         df.index = pd.to_datetime(df.index)
+        df.index = df.index.strftime('%Y-%m-%d')
         df = df[:12*5] # get data for the last 5 years
         df = df[['4. close']].astype(float)
         df = df.rename(columns={'4. close': 'Price'})
@@ -148,9 +147,9 @@ def get_income_statement(symbol: str) -> pd.DataFrame:
                 '= Gross Profit': (report['grossProfit']),
                 '(-) Operating Expense': (report['operatingExpenses']),
                 '= Operating Income': (report['operatingIncome']),
-                '(+/-) Other Income/Expenses': (report['totalOtherIncomeExpensesNet']),
+                '(+-) Other Income/Expenses': (report['totalOtherIncomeExpensesNet']),
                 '= Income Before Tax': (report['incomeBeforeTax']),                
-                '(+/-) Tax Income/Expense': (report['incomeTaxExpense']),
+                '(+-) Tax Income/Expense': (report['incomeTaxExpense']),
                 '= Net Income': (report['netIncome']),
             })
 
