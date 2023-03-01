@@ -1,17 +1,24 @@
+"""
+This is a financial analysis application that allows users to input a stock symbol and receive various financial
+metrics and visualizations for the corresponding company.
+"""
+
 # Import necessary libraries
 import streamlit as st
-from millify import millify
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.graph_objs import layout
+from millify import millify
+from utils import (
+    config_menu_footer, generate_card, empty_lines, get_delta
+)
+from data import (
+    get_income_statement, get_balance_sheet, get_stock_price, get_company_info,
+    get_financial_ratios, get_key_metrics, get_cash_flow
+)
 
-# import functions from the utils.py and data.py files
-from utils import config_menu_footer, generate_card, empty_lines, get_delta
-from data import get_income_statement, get_balance_sheet, get_stock_price, get_company_info
-from data import get_financial_ratios, get_key_metrics, get_cash_flow
 
 # Define caching functions for each API call
-
 @st.cache_data
 def company_info(symbol):
     return get_company_info(symbol)
@@ -41,7 +48,6 @@ def cash_flow(symbol):
     return get_cash_flow(symbol)
 
 # Define caching function for delta
-
 @st.cache_data
 def delta(df,key):
     return get_delta(df,key)
@@ -122,7 +128,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         # Define columns for the bottom row
         col4, col5, col6 = st.columns((2,2,3))
 
-        # Display key metrics
+        # Display key metrics  
         with col4:
             empty_lines(3)
             st.metric(label="Market Cap", value=millify(metrics_data['Market Cap'][0], precision=2), delta=delta(metrics_data,'Market Cap'))
@@ -154,9 +160,9 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
             st.dataframe(income_statement)
 
 
-        # MARKET PERFORMANCE 
+        # Display market performance
         # Determine the color of the line based on the first and last prices
-        line_color = 'rgba(34,139,34,0.7)' if performance_data.iloc[0]['Price'] > performance_data.iloc[-1]['Price'] else 'rgba(139,0,0,0.8)'
+        line_color = 'rgb(60, 179, 113)' if performance_data.iloc[0]['Price'] > performance_data.iloc[-1]['Price'] else 'rgb(255, 87, 48)'
 
         # Create the line chart 
         fig = go.Figure(
@@ -180,7 +186,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         st.plotly_chart(fig, use_container_width=True)
 
 
-        # NET INCOME
+        # Display net income
         # Create the line chart 
         fig = go.Figure()
         fig.add_trace(
@@ -209,7 +215,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         st.plotly_chart(fig)
 
 
-        # PROFITABILITY MARGINS
+        # Display profitability margins
         # Create an horizontal bar chart of profitability margins
         fig = go.Figure()
         fig.add_trace(go.Bar(
@@ -246,7 +252,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         st.plotly_chart(fig)
 
 
-        #BALANCE SHEET
+        #Display balance sheet
         # Create a vertical bar chart of Assets and Liabilities
         fig = go.Figure()
         fig.add_trace(go.Bar(
@@ -284,7 +290,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         st.plotly_chart(fig)
 
 
-        # ROA AND ROE
+        # Display ROE and ROA
         # Create the line chart 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -310,7 +316,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         st.plotly_chart(fig)
 
 
-        # CASH FLOWS
+        # Display cash flows
         # Create a vertical bar chart of Cash flows
         fig = go.Figure()
         fig.add_trace(go.Bar(
@@ -364,3 +370,66 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         st.error('Not possible to develop dashboard. Please try again.')
         st.error(f"An error occurred: {e}")
         
+
+    #Add download button
+    empty_lines(2)
+    try:
+        # Create dataframes for each financial statement
+        company_data = pd.DataFrame.from_dict(company_data, orient='index')
+        company_data = (
+            company_data.reset_index()
+            .rename(columns={'index':'Key', 0:'Value'})
+            .set_index('Key')
+        )
+        metrics_data = metrics_data.round(2).T
+        income_data = income_data.round(2)
+        ratios_data = ratios_data.round(2).T
+        balance_sheet_data = balance_sheet_data.round(2).T
+        cashflow_data = cashflow_data.T
+
+        # Clean up income statement column names and transpose dataframe
+        income_data.columns = income_data.columns.str.replace(r'[\/\(\)\-\+=]\s?', '', regex=True)
+        income_data = income_data.T
+
+        # Combine all dataframes into a dictionary
+        dfs = {
+            'Stock': company_data,
+            'Market Performance': performance_data,    
+            'Income Statement': income_data,
+            'Balance Sheet': balance_sheet_data,
+            'Cash flow': cashflow_data,
+            'Key Metrics': metrics_data,
+            'Financial Ratios': ratios_data
+        }
+
+        # Write the dataframes to an Excel file, with special formatting for the Market Performance sheet
+        writer = pd.ExcelWriter(symbol_input + '_financial_data.xlsx', engine='xlsxwriter')
+        for sheet_name, df in dfs.items():
+            if sheet_name == 'Market Performance':
+                # Rename index column and format date column
+                df.index.name = 'Date'
+                df = df.reset_index()
+                df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
+                # Write dataframe to Excel sheet without index column
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+            else:
+                # Write dataframe to Excel sheet with index column
+                df.to_excel(writer, sheet_name=sheet_name, index=True)
+            # Autofit columns in Excel sheet
+            writer.sheets[sheet_name].autofit()
+
+        # Close the Excel writer object
+        writer.close()
+
+        # Create a download button for the Excel file
+        with open(symbol_input + '_financial_data.xlsx', 'rb') as f:
+            data = f.read()
+            if st.download_button(
+                label='Download Data',
+                data=data,
+                file_name=symbol_input + '_financial_data.xlsx',
+                mime='application/octet-stream'
+            ):
+                st.success('Download successful!')
+    except Exception as e:
+        st.info('Data not available for download')
