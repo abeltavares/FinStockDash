@@ -94,7 +94,6 @@ def get_stock_price(symbol: str) -> pd.DataFrame:
         data = response.json()['Monthly Adjusted Time Series']
         df = pd.DataFrame.from_dict(data, orient='index')
         df.index = pd.to_datetime(df.index)
-        df.index = df.index.strftime('%Y-%m-%d')
         df = df[:12*5] # get data for the last 5 years
         df = df[['4. close']].astype(float)
         df = df.rename(columns={'4. close': 'Price'})
