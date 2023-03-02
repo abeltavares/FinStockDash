@@ -60,7 +60,7 @@ st.set_page_config(
 )
 
 # Configure the menu and footer with the user's information
-config_menu_footer('abeltavares','abeltavares','abeltavares')
+config_menu_footer('abeltavares','abeltavares','Abel Tavares')
 
 # Display the app title
 st.title("Financial Dashboard 📈")
