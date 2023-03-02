@@ -25,7 +25,7 @@ To run the app locally, follow these steps:
        $ python3 -m venv venv
        $ source venv/bin/activate
 
-3. Install the required librarie:<br>
+3. Install the required libraries:<br>
 
        $ pip install -r requirements.txt
 
