@@ -1,5 +1,5 @@
 # Financial Dashboard App
-The Financial Dashboard App is a web application that allows users to analyze stock data using various financial ratios, balance sheets, income statements, and other financial metrics. User can enter a stock ticker symbol to retrieve relevant financial information, view stock prices over time, and generate visualizations of financial data to gather insights on the company performance. The application makes use of APIs provided by Financial Modeling Prep and Alpha Vantage to retrieve real-time stock data.
+The Financial Dashboard is a web application that allows users to analyze stock data using various financial ratios, balance sheets, income statements, and other financial metrics. User can enter a stock ticker symbol to retrieve relevant financial information, view stock prices over time, and generate visualizations to gather insights on the company performance. The application makes use of APIs provided by Financial Modeling Prep and Alpha Vantage to retrieve real-time stock data.
 
 
 ### Requirements
