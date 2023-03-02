@@ -3,5 +3,5 @@ pandas
 numpy
 millify
 plotly
-streamlit
+streamlit==1.18.1
 XlsxWriter
