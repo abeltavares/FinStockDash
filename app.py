@@ -183,7 +183,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         )
 
         # Render the line chart 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, zoom=False)
 
 
         # Display net income
@@ -212,7 +212,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         )
 
         # Display the graph
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True, zoom=False)
 
 
         # Display profitability margins
@@ -249,7 +249,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         )
 
         # Display the plot 
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True, zoom=False)
 
 
         #Display balance sheet
@@ -287,7 +287,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         )
 
         # Display the plot 
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True, zoom=False)
 
 
         # Display ROE and ROA
@@ -313,7 +313,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         )
 
         # Display the plot in Streamlit
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True, zoom=False)
 
 
         # Display cash flows
@@ -359,7 +359,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         )
 
         # Display the plot 
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, use_container_width=True, zoom=False)
 
         #Display financial ratios table 
         st.markdown('**Financial Ratios**')
