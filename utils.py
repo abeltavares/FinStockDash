@@ -4,9 +4,10 @@ This module contains utility functions for the financial analysis application.
 
 # Import necessary libraries
 import streamlit as st
+import pandas as pd
 
 
-def config_menu_footer(github_user,linkedin_user, author_name):
+def config_menu_footer(github_user: str, linkedin_user: str, author_name: str) -> None:
     """
     Hides the Streamlit menu and replaces footer.
 
@@ -36,7 +37,7 @@ def config_menu_footer(github_user,linkedin_user, author_name):
     st.markdown(app_style, unsafe_allow_html=True)
 
 
-def get_delta(df, key):
+def get_delta(df: pd.DataFrame, key: str) -> str:
     """
     Calculates the real percentage difference between the first two values for a given key in a Pandas DataFrame.
 
@@ -66,7 +67,7 @@ def get_delta(df, key):
     return f"{delta:.2f}%"
 
 
-def empty_lines(n):
+def empty_lines(n: int) -> None:
     """
     Inserts empty lines to separate content.
 
@@ -77,7 +78,7 @@ def empty_lines(n):
         st.write("")
 
 
-def generate_card(text):
+def generate_card(text: str) -> None:
     """
     Generates a styled card with a title and icon.
 
@@ -90,3 +91,19 @@ def generate_card(text):
             <h3 style='text-align: center'>{text}</h3>
         </div>
          """, unsafe_allow_html=True)
+
+
+def color_highlighter(val: str) -> str:
+    """
+    Returns CSS styling for a pandas DataFrame cell based on whether its value is positive or negative.
+
+    Parameters:
+        val (str): The cell value.
+
+    Returns:
+        str: The CSS styling string.
+    """
+    if val.startswith('-'):
+        return 'color: rgba(255, 0, 0, 0.9);'
+    else:
+        return None
