@@ -26,3 +26,6 @@ data/
 *.egg-info/
 dist/
 build/
+
+# Ignore Streamlit secrets file
+.streamlit/secrets.toml
