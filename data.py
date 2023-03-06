@@ -9,8 +9,8 @@ import numpy as np
 import streamlit as st
 
 
-FMP_API_KEY  # replace with your Financial Modeling Prep API key
-ALPHA_API_KEY # replace with your Alpha Vantage API key
+FMP_API_KEY = st.secrets["FMP_API_KEY"] # replace with your Financial Modeling Prep API key
+ALPHA_API_KEY = st.secrets["ALPHA_API_KEY"] # replace with your Alpha Vantage API key
 
 
 def get_company_info(symbol: str) -> dict:
