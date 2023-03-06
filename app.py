@@ -167,7 +167,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
             st.markdown('**Income Statement**')
                         
             # Allow the user to select a year to display
-            year = st.selectbox('All numbers in thousands', income_statement_data.columns, label_visibility='visible')
+            year = st.selectbox('All numbers in thousands', income_statement_data.columns, label_visibility='collapsed')
 
             # Slice the income data to only show the selected year and format numbers with millify function
             income_statement_data = income_statement_data.loc[:, [year]]
