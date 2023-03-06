@@ -5,12 +5,15 @@ metrics and visualizations for the corresponding company.
 
 # Import necessary libraries
 import streamlit as st
+from io import BytesIO
 from millify import millify
 import pandas as pd
+import numpy as np
 import plotly.graph_objs as go
-from plotly.graph_objs import layout
+from io import BytesIO
+import sys
 from utils import (
-    config_menu_footer, generate_card, empty_lines, get_delta
+    config_menu_footer, generate_card, empty_lines, get_delta, color_highlighter
 )
 from data import (
     get_income_statement, get_balance_sheet, get_stock_price, get_company_info,
@@ -19,38 +22,33 @@ from data import (
 
 
 # Define caching functions for each API call
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def company_info(symbol):
     return get_company_info(symbol)
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def income_statement(symbol):
     return get_income_statement(symbol)
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def balance_sheet(symbol):
     return get_balance_sheet(symbol)
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def stock_price(symbol):
     return get_stock_price(symbol)
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def financial_ratios(symbol):
     return get_financial_ratios(symbol)
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def key_metrics(symbol):
     return get_key_metrics(symbol)
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
 def cash_flow(symbol):
     return get_cash_flow(symbol)
-
-# Define caching function for delta
-@st.cache_data
-def delta(df,key):
-    return get_delta(df,key)
 
 # Configure the app page
 st.set_page_config(
@@ -58,6 +56,11 @@ st.set_page_config(
     page_icon='📈',
     layout="centered",
 )
+
+# Define caching function for delta
+@st.cache_data(ttl=60*60*24*30) # cache output for 30 days
+def delta(df,key):
+    return get_delta(df,key)
 
 # Configure the menu and footer with the user's information
 config_menu_footer('abeltavares','abeltavares','Abel Tavares')
@@ -87,7 +90,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
 
     try:
         # Call the API functions to get the necessary data for the dashboard
-        company_data = company_info(symbol_input)
+        company_data = get_company_info(symbol_input)
         metrics_data = key_metrics(symbol_input)
         income_data = income_statement(symbol_input)
         performance_data = stock_price(symbol_input)
@@ -95,41 +98,49 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         balance_sheet_data = balance_sheet(symbol_input)
         cashflow_data = cash_flow(symbol_input)
 
-    except Exception as e:
-        st.error('Not possible to retrieve data for that ticker. Please check if its valid and try again')
-        st.error(f"An error occurred: {e}")
+    except Exception:
+        st.error('Not possible to retrieve data for that ticker. Please check if its valid and try again.')
+        sys.exit()
 
     # Display dashboard
+    empty_lines(2)
     try:
-        empty_lines(2)
-        generate_card(company_data['Name'])
-
-        # Define columns for the top row
-        col1, col2, col3 = st.columns((2,2,2))
-
         # Display company info
+        col1, col2 = st.columns((8.5,1.5))
         with col1:
+            generate_card(company_data['Name'])
+        with col2:
+            # display image and make it clickable
+            image_html = f"<a href='{company_data['Website']}' target='_blank'><img src='{company_data['Image']}' alt='{company_data['Name']}' height='75' width='95'></a>"
+            st.markdown(image_html, unsafe_allow_html=True)
+
+        col3, col4, col5, col6, col7 = st.columns((0.2,1.4,1.4,2,2.6))
+
+        with col4:
             empty_lines(1)
-            generate_card(company_data['Exchange'])
+            st.metric(label="Price", value=company_data['Price'], delta=company_data['Price change'])
             empty_lines(2)
 
-        with col2:
+        with col5:
             empty_lines(1)
             generate_card(company_data['Currency'])
             empty_lines(2)
 
-        with col3:
+        with col6:
             empty_lines(1)
-            # Capitalize first letter of each word in sector
-            sector = company_data['Sector'].title()
-            generate_card(sector)
+            generate_card(company_data['Exchange'])
             empty_lines(2)
 
-        # Define columns for the bottom row
-        col4, col5, col6 = st.columns((2,2,3))
+        with col7:
+            empty_lines(1)
+            generate_card(company_data['Sector'])            
+            empty_lines(2)
+
+        # Define columns for key metrics and IS
+        col8, col9, col10 = st.columns((2,2,3))
 
         # Display key metrics  
-        with col4:
+        with col8:
             empty_lines(3)
             st.metric(label="Market Cap", value=millify(metrics_data['Market Cap'][0], precision=2), delta=delta(metrics_data,'Market Cap'))
             st.write("")
@@ -137,28 +148,51 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
             st.write("")
             st.metric(label="ROE", value = str(round(metrics_data['ROE'][0] * 100, 2)) + '%', delta=delta(metrics_data,'ROE'))
 
-        with col5:
+        with col9:
             empty_lines(3)
             st.metric(label="Working Capital", value = millify(metrics_data['Working Capital'][0], precision = 2), delta=delta(metrics_data,'Working Capital'))
             st.write("")
             st.metric(label="P/E Ratio", value = round(metrics_data['P/E Ratio'][0],2), delta=delta(metrics_data,'P/E Ratio'))
             st.write("")
-            st.metric(label="Dividends (yield)", value = str(round(metrics_data['Dividend Yield'][0]* 100, 2)) + '%', delta=delta(metrics_data,'Dividend Yield'))
+            # Check if the company pays dividends
+            if metrics_data['Dividend Yield'][0] == 0:
+                st.metric(label="Dividends (yield)", value = '0')
+            else:
+                st.metric(label="Dividends (yield)", value = str(round(metrics_data['Dividend Yield'][0]* 100, 2)) + '%', delta=delta(metrics_data,'Dividend Yield'))
+        with col10:      
+            # Transpose the income data so that the years are the columns
+            income_statement_data = income_data.T
 
-        # Define the income statement data
-        income_statement = income_data.T
-        income_statement = income_statement.applymap(lambda x: millify(x, precision=2))
-
-        # Display income statement
-        with col6:
-            # Add the subheader to the left column
+            # Display a markdown header for the income statement
             st.markdown('**Income Statement**')
-            # Display selectbox to choose year
-            year = st.selectbox('All numbers in thousands', income_statement.columns, label_visibility='visible')
-            # Show the data for the selected year
-            income_statement = income_statement.loc[:, [year]]
-            st.dataframe(income_statement)
+                        
+            # Allow the user to select a year to display
+            year = st.selectbox('All numbers in thousands', income_statement_data.columns, label_visibility='visible')
 
+            # Slice the income data to only show the selected year and format numbers with millify function
+            income_statement_data = income_statement_data.loc[:, [year]]
+            income_statement_data = income_statement_data.applymap(lambda x: millify(x, precision=2))
+                        
+            # Apply the color_highlighter function to highlight negative numbers
+            income_statement_data = income_statement_data.style.applymap(color_highlighter)
+
+            # Style the table headers with black color
+            headers = {
+                'selector': 'th:not(.index_name)',
+                'props': [('color', 'black')]
+            }
+
+            income_statement_data.set_table_styles([headers])
+
+            # Display the income statement table in Streamlit
+            st.table(income_statement_data)
+
+
+        # Configure the plots bar
+        config = {
+            'displaylogo': False, 
+            'modeBarButtonsToRemove': ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoScale2d', 'toggleSpikelines', 'resetScale2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosest3d', 'hoverClosestGeo', 'hoverClosestGl2d', 'hoverClosestPie', 'toggleHover', 'resetViews', 'toggleSpikeLines', 'resetViewMapbox', 'resetGeo', 'hoverClosestGeo', 'sendDataToCloud', 'hoverClosestGl']
+        }
 
         # Display market performance
         # Determine the color of the line based on the first and last prices
@@ -175,15 +209,22 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
             )
         )
 
-        # Add chart title
+        # Customize the chart layout
         fig.update_layout(
             title={
                 'text': 'Market Performance',
-            }
+            },
+            dragmode='pan',
+            xaxis=dict(
+            fixedrange=True
+            ),
+        yaxis=dict(
+            fixedrange=True
+            )
         )
 
         # Render the line chart 
-        st.plotly_chart(fig, use_container_width=True, zoom=False)
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
 
         # Display net income
@@ -205,14 +246,19 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         # Customize the chart layout
         fig.update_layout(
             title="Net Income",
+            dragmode='pan',
             xaxis=dict(
                 tickmode='array', 
                 tickvals=income_data.index,
-            )
+                fixedrange=True
+            ),
+            yaxis=dict(
+                fixedrange=True
+            ),
         )
 
         # Display the graph
-        st.plotly_chart(fig, use_container_width=True, zoom=False)
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
 
         # Display profitability margins
@@ -245,11 +291,18 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         fig.update_layout(
             title='Profitability Margins',
             bargap=0.1,
-            xaxis=dict(tickformat='.0%')
+            dragmode='pan',
+            xaxis=dict(
+                fixedrange=True,
+                tickformat='.0%'
+            ),
+            yaxis=dict(
+            fixedrange=True
+             )
         )
 
         # Display the plot 
-        st.plotly_chart(fig, use_container_width=True, zoom=False)
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
 
         #Display balance sheet
@@ -284,10 +337,17 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         fig.update_layout(
             title='Balance Sheet',
             bargap=0.4,
+            dragmode='pan',
+            xaxis=dict(
+                fixedrange=True
+            ),
+                yaxis=dict(
+                fixedrange=True,
+             )
         )
 
         # Display the plot 
-        st.plotly_chart(fig, use_container_width=True, zoom=False)
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
 
         # Display ROE and ROA
@@ -309,11 +369,18 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         # Update layout
         fig.update_layout(
             title='ROE and ROA',
-            yaxis=dict(tickformat='0%')
+            dragmode='pan',
+            xaxis=dict(
+                fixedrange=True
+            ),
+            yaxis=dict(
+                fixedrange=True,
+                tickformat='.0%'
+            )
         )
 
         # Display the plot in Streamlit
-        st.plotly_chart(fig, use_container_width=True, zoom=False)
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
 
         # Display cash flows
@@ -356,75 +423,119 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         fig.update_layout(
             title='Cash flows',
             bargap=0.1,
+                xaxis=dict(
+                fixedrange=True,
+            ),
+            yaxis=dict(
+                fixedrange=True,
+            )
         )
 
         # Display the plot 
-        st.plotly_chart(fig, use_container_width=True, zoom=False)
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
         #Display financial ratios table 
+        empty_lines(1)
         st.markdown('**Financial Ratios**')
-        ratios_table = round(ratios_data.T,2)
+        # Rename keys and format values as needed
+        ratios_table = ratios_data.rename(columns={
+            'Days of Sales Outstanding': 'Days of Sales Outstanding (days)',
+            'Days of Inventory Outstanding': 'Days of Inventory Outstanding (days)',
+            'Operating Cycle': 'Operating Cycle (days)',
+            'Days of Payables Outstanding': 'Days of Payables Outstanding (days)',
+            'Cash Conversion Cycle': 'Cash Conversion Cycle (days)',
+            'Gross Profit Margin': 'Gross Profit Margin (%)', 
+            'Operating Profit Margin': 'Operating Profit Margin (%)',
+            'Pretax Profit Margin': 'Pretax Profit Margin (%)',
+            'Net Profit Margin': 'Net Profit Margin (%)',
+            'Effective Tax Rate': 'Effective Tax Rate (%)',
+            'Return on Assets': 'Return on Assets (%)',
+            'Return on Equity': 'Return on Equity (%)',
+            'Return on Capital Employed': 'Return on Capital Employed (%)',
+            'EBIT per Revenue': 'EBIT per Revenue (%)',
+            'Debt Ratio': 'Debt Ratio (%)',
+            'Long-term Debt to Capitalization': 'Long-term Debt to Capitalization (%)',
+            'Total Debt to Capitalization': 'Total Debt to Capitalization (%)',
+            'Payout Ratio': 'Payout Ratio (%)',
+            'Operating Cash Flow Sales Ratio': 'Operating Cash Flow Sales Ratio (%)',
+            'Dividend Yield': 'Dividend Yield (%)',
+        })
+
+        # Multiply values in columns with "%" symbol by 100
+        for col in ratios_table.columns:
+            if "%" in col:
+                ratios_table[col] = ratios_table[col] * 100
+
+        ratios_table = round(ratios_table.T,2)
+        
+
         ratios_table = ratios_table.sort_index(axis=1, ascending=True)
+
+        # Display ratios table
         st.dataframe(ratios_table, width=800, height=400)
-    except Exception as e:
+
+    except Exception:
         st.error('Not possible to develop dashboard. Please try again.')
-        st.error(f"An error occurred: {e}")
+        sys.exit()
 
     #Add download button
-    empty_lines(2)
-    # Create dataframes for each financial statement
-    company_data = pd.DataFrame.from_dict(company_data, orient='index')
-    company_data = (
-        company_data.reset_index()
-        .rename(columns={'index':'Key', 0:'Value'})
-        .set_index('Key')
-    )
-    metrics_data = metrics_data.round(2).T
-    income_data = income_data.round(2)
-    ratios_data = ratios_data.round(2).T
-    balance_sheet_data = balance_sheet_data.round(2).T
-    cashflow_data = cashflow_data.T
+    empty_lines(3)
+    try:
+        # Create dataframes for each financial statement
+        company_data = pd.DataFrame.from_dict(company_data, orient='index')
+        company_data = (
+            company_data.reset_index()
+            .rename(columns={'index':'Key', 0:'Value'})
+            .set_index('Key')
+        )
+        metrics_data = metrics_data.round(2).T
+        income_data = income_data.round(2)
+        ratios_data = ratios_data.round(2).T
+        balance_sheet_data = balance_sheet_data.round(2).T
+        cashflow_data = cashflow_data.T
 
-    # Clean up income statement column names and transpose dataframe
-    income_data.columns = income_data.columns.str.replace(r'[\/\(\)\-\+=]\s?', '', regex=True)
-    income_data = income_data.T
+        # Clean up income statement column names and transpose dataframe
+        income_data.columns = income_data.columns.str.replace(r'[\/\(\)\-\+=]\s?', '', regex=True)
+        income_data = income_data.T
 
-    # Combine all dataframes into a dictionary
-    dfs = {
-        'Stock': company_data,
-        'Market Performance': performance_data,    
-        'Income Statement': income_data,
-        'Balance Sheet': balance_sheet_data,
-        'Cash flow': cashflow_data,
-        'Key Metrics': metrics_data,
-        'Financial Ratios': ratios_data
-    }
+        # Combine all dataframes into a dictionary
+        dfs = {
+            'Stock': company_data,
+            'Market Performance': performance_data,    
+            'Income Statement': income_data,
+            'Balance Sheet': balance_sheet_data,
+            'Cash flow': cashflow_data,
+            'Key Metrics': metrics_data,
+            'Financial Ratios': ratios_table
+        }
 
-    # Write the dataframes to an Excel file, with special formatting for the Market Performance sheet
-    writer = pd.ExcelWriter(symbol_input + '_financial_data.xlsx', engine='xlsxwriter')
-    for sheet_name, df in dfs.items():
-        if sheet_name == 'Market Performance':
-            # Rename index column and format date column
-            df.index.name = 'Date'
-            df = df.reset_index()
-            df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
-            # Write dataframe to Excel sheet without index column
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
-        else:
-            # Write dataframe to Excel sheet with index column
-            df.to_excel(writer, sheet_name=sheet_name, index=True)
-        # Autofit columns in Excel sheet
-        writer.sheets[sheet_name].autofit()
+        # Write the dataframes to an Excel file, with special formatting for the Market Performance sheet
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        for sheet_name, df in dfs.items():
+            if sheet_name == 'Market Performance':
+                # Rename index column and format date column
+                df.index.name = 'Date'
+                df = df.reset_index()
+                df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
+                # Write dataframe to Excel sheet without index column
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+            else:
+                # Write dataframe to Excel sheet with index column
+                df.to_excel(writer, sheet_name=sheet_name, index=True)
+            # Autofit columns in Excel sheet
+            writer.sheets[sheet_name].autofit()
 
-    # Close the Excel writer object
-    writer.close()
+        # Close the Excel writer object
+        writer.close()
 
-    # Create a download button for the Excel file
-    with open(symbol_input + '_financial_data.xlsx', 'rb') as f:
-        data = f.read()
+        # Create a download button for the Excel file
+        data = output.getvalue()
         st.download_button(
-            label='Download Data',
+            label='Download ' + symbol_input + ' Financial Data (.xlsx)',
             data=data,
             file_name=symbol_input + '_financial_data.xlsx',
             mime='application/octet-stream'
         )
+    except Exception:
+        st.info('Data not available for download')
