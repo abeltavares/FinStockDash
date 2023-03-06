@@ -37,11 +37,7 @@ To run the app locally, follow these steps:
 
        $ pip install -r requirements.txt
 
-4. Create the database and schema:<br>
-
-       $ psql -f schema_tables.sql
-
-5. Run the app:
+4. Run the app:
 
        $ streamlit run app.py
 
