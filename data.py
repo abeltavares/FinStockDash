@@ -23,12 +23,10 @@ def get_company_info(symbol: str) -> dict:
     Returns:
         dict: Dictionary containing information about the company
     """
-    # Define the API endpoint and parameters for the Alpha Vantage API
-    api_endpoint = 'https://www.alphavantage.co/query'
+    # Set the API endpoint URL
+    api_endpoint = f'https://financialmodelingprep.com/api/v3/profile/{symbol}/'
     params = {
-        'function': 'OVERVIEW',
-        'symbol': symbol,  
-        'apikey': ALPHA_API_KEY, 
+        'apikey': FMP_API_KEY,  
     }
 
     try:
@@ -41,16 +39,22 @@ def get_company_info(symbol: str) -> dict:
         # Convert the response data to a Python dictionary
         data = response.json()
 
+        # Extract the first (and only) item from the list of company data
+        data = data[0]
+
         # Extract the desired company information from the dictionary
         company_info = {
-            'Name': data.get('Name'),
-            'Exchange': data.get('Exchange'),
-            'Currency': data.get('Currency'),
-            'Sector': data.get('Sector'),
-            'Market Cap':  data.get('MarketCapitalization'),
-            'Profit Margin': data.get('ProfitMargin'),
-            'Beta': data.get('Beta'),
-            'EPS': data.get('EPS')
+            'Name': data['companyName'],
+            'Exchange': data['exchangeShortName'],
+            'Currency': data['currency'],
+            'Country': data['country'],            
+            'Sector': data['sector'],
+            'Market Cap':  data['mktCap'],
+            'Price': data['price'],
+            'Beta': data['beta'],
+            'Price change': data['changes'],
+            'Website': data['website'],
+            'Image': data['image']
         }
 
         # Return the company information dictionary
@@ -354,50 +358,50 @@ def get_financial_ratios(symbol: str) -> pd.DataFrame:
             year = report['date'].split('-')[0]
             ratios_data.append({
                 'Year': year,
-                'Current Ratio': round(report['currentRatio'], 2),
-                'Quick Ratio': round(report['quickRatio'], 2),
-                'Cash Ratio': round(report['cashRatio'], 2),
-                'Days of Sales Outstanding': round(report['daysOfSalesOutstanding'], 2),
-                'Days of Inventory Outstanding': round(report['daysOfInventoryOutstanding'], 2),
-                'Operating Cycle': round(report['operatingCycle'], 2),
-                'Days of Payables Outstanding': round(report['daysOfPayablesOutstanding'], 2),
-                'Cash Conversion Cycle': round(report['cashConversionCycle'], 2),
+                'Current Ratio': report['currentRatio'],
+                'Quick Ratio': report['quickRatio'],
+                'Cash Ratio': report['cashRatio'],
+                'Days of Sales Outstanding': report['daysOfSalesOutstanding'],
+                'Days of Inventory Outstanding': report['daysOfInventoryOutstanding'],
+                'Operating Cycle': report['operatingCycle'],
+                'Days of Payables Outstanding': report['daysOfPayablesOutstanding'],
+                'Cash Conversion Cycle': report['cashConversionCycle'],
                 'Gross Profit Margin': report['grossProfitMargin'], 
-                'Operating Profit Margin': round(report['operatingProfitMargin'], 2),
-                'Pretax Profit Margin': round(report['pretaxProfitMargin'], 2),
+                'Operating Profit Margin': report['operatingProfitMargin'],
+                'Pretax Profit Margin': report['pretaxProfitMargin'],
                 'Net Profit Margin': report['netProfitMargin'],
-                'Effective Tax Rate': round(report['effectiveTaxRate'], 2),
-                'Return on Assets': round(report['returnOnAssets'], 2),
-                'Return on Equity': round(report['returnOnEquity'], 2),
-                'Return on Capital Employed': round(report['returnOnCapitalEmployed'], 2),
-                'Net Income per EBT': round(report['netIncomePerEBT'], 2),
-                'EBT per EBIT': round(report['ebtPerEbit'], 2),
-                'EBIT per Revenue': round(report['ebitPerRevenue'], 2),
-                'Debt Ratio': round(report['debtRatio'], 2),
-                'Debt Equity Ratio': round(report['debtEquityRatio'], 2),
-                'Long-term Debt to Capitalization': round(report['longTermDebtToCapitalization'], 2),
-                'Total Debt to Capitalization': round(report['totalDebtToCapitalization'], 2),
-                'Interest Coverage': round(report['interestCoverage'], 2),
-                'Cash Flow to Debt Ratio': round(report['cashFlowToDebtRatio'], 2),
-                'Company Equity Multiplier': round(report['companyEquityMultiplier'], 2),
-                'Receivables Turnover': round(report['receivablesTurnover'], 2),
-                'Payables Turnover': round(report['payablesTurnover'], 2),
-                'Inventory Turnover': round(report['inventoryTurnover'], 2),
-                'Fixed Asset Turnover': round(report['fixedAssetTurnover'], 2),
-                'Asset Turnover': round(report['assetTurnover'], 2),
-                'Operating Cash Flow per Share': round(report['operatingCashFlowPerShare'], 2),
-                'Free Cash Flow per Share': round(report['freeCashFlowPerShare'], 2),
-                'Cash per Share': round(report['cashPerShare'], 2),
-                'Payout Ratio': round(report['payoutRatio'], 2),
-                'Operating Cash Flow Sales Ratio': round(report['operatingCashFlowSalesRatio'], 2),
-                'Free Cash Flow Operating Cash Flow Ratio': round(report['freeCashFlowOperatingCashFlowRatio'], 2),
-                'Cash Flow Coverage Ratios': round(report['cashFlowCoverageRatios'], 2),
-                'Price to Book Value Ratio': round(report['priceToBookRatio'], 2),
-                'Price to Earnings Ratio': round(report['priceEarningsRatio'], 2),
-                'Price to Sales Ratio': round(report['priceToSalesRatio'], 2),
+                'Effective Tax Rate': report['effectiveTaxRate'],
+                'Return on Assets': report['returnOnAssets'],
+                'Return on Equity': report['returnOnEquity'],
+                'Return on Capital Employed': report['returnOnCapitalEmployed'],
+                'Net Income per EBT': report['netIncomePerEBT'],
+                'EBT per EBIT': report['ebtPerEbit'],
+                'EBIT per Revenue': report['ebitPerRevenue'],
+                'Debt Ratio': report['debtRatio'],
+                'Debt Equity Ratio': report['debtEquityRatio'],
+                'Long-term Debt to Capitalization': report['longTermDebtToCapitalization'],
+                'Total Debt to Capitalization': report['totalDebtToCapitalization'],
+                'Interest Coverage': report['interestCoverage'],
+                'Cash Flow to Debt Ratio': report['cashFlowToDebtRatio'],
+                'Company Equity Multiplier': report['companyEquityMultiplier'],
+                'Receivables Turnover': report['receivablesTurnover'],
+                'Payables Turnover': report['payablesTurnover'],
+                'Inventory Turnover': report['inventoryTurnover'],
+                'Fixed Asset Turnover': report['fixedAssetTurnover'],
+                'Asset Turnover': report['assetTurnover'],
+                'Operating Cash Flow per Share': report['operatingCashFlowPerShare'],
+                'Free Cash Flow per Share': report['freeCashFlowPerShare'],
+                'Cash per Share': report['cashPerShare'],
+                'Payout Ratio': report['payoutRatio'],
+                'Operating Cash Flow Sales Ratio': report['operatingCashFlowSalesRatio'],
+                'Free Cash Flow Operating Cash Flow Ratio': report['freeCashFlowOperatingCashFlowRatio'],
+                'Cash Flow Coverage Ratios': report['cashFlowCoverageRatios'],
+                'Price to Book Value Ratio': report['priceToBookRatio'],
+                'Price to Earnings Ratio': report['priceEarningsRatio'],
+                'Price to Sales Ratio': report['priceToSalesRatio'],
                 'Dividend Yield': report['dividendYield'],
-                'Enterprise Value to EBITDA': round(report['enterpriseValueMultiple'], 2),
-                'Price to Fair Value': round(report['priceFairValue'], 2)
+                'Enterprise Value to EBITDA': report['enterpriseValueMultiple'],
+                'Price to Fair Value': report['priceFairValue']
             })
 
         # Create a Pandas DataFrame from the list of dictionaries and return it
