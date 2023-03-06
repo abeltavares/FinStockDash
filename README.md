@@ -1,6 +1,6 @@
 [![Finance](https://img.shields.io/badge/Finance-Project-blue.svg)](https://github.com/abeltavares/financial_dashboard_app)
 [![Streamlit](https://img.shields.io/badge/Made%20with-Streamlit-FF6F61.svg)](https://streamlit.io/)
-![Python Version](https://img.shields.io/badge/Python-3.10.10-blue)
+[![Python Version](https://img.shields.io/badge/Python-3.10.10-blue)](https://www.python.org/downloads/)
 
 
 
