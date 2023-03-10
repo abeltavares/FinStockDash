@@ -474,7 +474,7 @@ if st.button('Go',on_click=callback) or st.session_state['btn_clicked']:
         # Display ratios table
         st.dataframe(ratios_table, width=800, height=400)
 
-    except Exception:
+    except Exception as e:
         st.error('Not possible to develop dashboard. Please try again.')
         sys.exit()
 
