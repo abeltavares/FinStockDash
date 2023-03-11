@@ -7,14 +7,9 @@ import streamlit as st
 import pandas as pd
 
 
-def config_menu_footer(github_user: str, linkedin_user: str, author_name: str) -> None:
+def config_menu_footer() -> None:
     """
     Hides the Streamlit menu and replaces footer.
-
-    Parameters:
-        github_user (str): The username for the GitHub account.
-        linkedin_user (str): The username for the LinkedIn account.
-        author_name (str): The name of the author.
     """
     app_style = f"""
         <style>
@@ -25,7 +20,7 @@ def config_menu_footer(github_user: str, linkedin_user: str, author_name: str) -
                 visibility: hidden;
             }}
             footer:before {{
-            content:"Produced by {author_name} | GitHub: {github_user} | LinkedIn: {linkedin_user}"; 
+            content:"Copyright © 2023 {author_name}; 
             visibility: visible;
             display: block;
             position: relative;
