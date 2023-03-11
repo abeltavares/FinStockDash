@@ -11,21 +11,21 @@ def config_menu_footer() -> None:
     """
     Hides the Streamlit menu and replaces footer.
     """
-    app_style = f"""
+    app_style = """
         <style>
-            #MainMenu {{
+            #MainMenu {
               visibility: hidden;
-            }}
-            footer {{
+            }
+            footer {
                 visibility: hidden;
-            }}
-            footer:before {{
-            content:"Copyright © 2023 Abel Tavares; 
+            }
+            footer:before {
+            content:"Copyright © 2023 Abel Tavares;
             visibility: visible;
             display: block;
             position: relative;
             text-align: center;
-            }}
+            }
         </style>
     """
 
