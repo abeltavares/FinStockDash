@@ -2,11 +2,11 @@
 [![Streamlit](https://img.shields.io/badge/Made%20with-Streamlit-FF6F61.svg)](https://streamlit.io/)
 [![Python Version](https://img.shields.io/badge/Python-3.10.10-blue)](https://www.python.org/downloads/)
 
-# Financial Dashboard App
+# FinStockDash 
 
 ![Demo](assets/web_app_demo.gif)
 
-The Financial Dashboard is a web application that allows users to analyze stock data using various financial ratios, balance sheet, income statement, and other financial metrics. User can enter a stock ticker symbol to retrieve relevant financial information, view stock prices over time, and generate visualizations to gather insights on the company performance. The application makes use of APIs provided by Financial Modeling Prep and Alpha Vantage to retrieve real-time stock data.
+FinStockDash is a web application that allows users to analyze stock data using various financial ratios, balance sheet, income statement, and other financial metrics. User can enter a stock ticker symbol to retrieve relevant financial information, view stock prices over time, and generate visualizations to gather insights on the company performance. The application makes use of APIs provided by Financial Modeling Prep and Alpha Vantage to retrieve real-time stock data.
 
 **Note:** The Financial Dashboard app uses APIs provided by Financial Modeling Prep and Alpha Vantage to retrieve real-time stock data. However, the free plan is limited to US stocks only. Therefore, the app will only work for US stocks and will not retrieve data for non-US stocks.
 
