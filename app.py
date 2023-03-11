@@ -63,7 +63,7 @@ def delta(df,key):
     return get_delta(df,key)
 
 # Configure the menu and footer with the user's information
-config_menu_footer('abeltavares','abeltavares','Abel Tavares')
+config_menu_footer()
 
 # Display the app title
 st.title("Financial Dashboard 📈")
