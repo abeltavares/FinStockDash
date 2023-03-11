@@ -20,7 +20,7 @@ def config_menu_footer() -> None:
                 visibility: hidden;
             }}
             footer:before {{
-            content:"Copyright © 2023 {author_name}; 
+            content:"Copyright © 2023 Abel Tavares; 
             visibility: visible;
             display: block;
             position: relative;
