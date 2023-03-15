@@ -12,13 +12,13 @@ FinStockDash is a web application that allows users to analyze stock data using 
 
 ### Requirements
 
-To run this app locally, you will need Python 3.x installed, as well as the required libraries listed in the requirements.txt file.
+To run this app locally, you will need Python 3.x installed, as well as the required libraries listed in the `requirements.txt` file.
 
 ### Files
 
-- app.py: This file contains the main code for the Streamlit app. It imports functions from the data.py and utils.py files to retrieve and display financial data.
-- data.py: This file contains functions for retrieving financial data from various APIs such as Financial Modeling Prep and Alpha Vantage.
-- utils.py: This file contains various utility functions that are used in the main app to create menus, cards, and other display elements.
+- `app.py`: Main code for the Streamlit app. It imports functions from the `data.py` and `utils.py` files to retrieve and display financial data.
+- `data.py`: Functions for retrieving financial data from various APIs such as Financial Modeling Prep and Alpha Vantage.
+- `utils.py`: Utility functions that are used in the main app to create menus, cards, and other display elements.
 
 
 ### Setup
@@ -51,3 +51,6 @@ To run the app locally, follow these steps:
 ## Contributions
 
 Contributions are welcome! Please feel free to open an issue or submit a pull request.
+
+## Copyright
+© 2023 Abel Tavares
